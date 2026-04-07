@@ -33,7 +33,7 @@ var runCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			return fmt.Errorf("provide a script name or use -l to list available scripts")
+			return fmt.Errorf("no script provided")
 		}
 
 		list, err := scripts.List(scriptsDir)
