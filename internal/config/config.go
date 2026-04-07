@@ -16,6 +16,14 @@ func Init() error {
 
 	nockDir := filepath.Join(dir, "nock")
 
+	if err := os.MkdirAll(nockDir, 0755); err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Join(nockDir, "scripts"), 0755); err != nil {
+		return err
+	}
+
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(nockDir)
@@ -34,16 +42,7 @@ func Init() error {
 }
 
 func seed(nockDir string) error {
-	if err := os.MkdirAll(nockDir, 0755); err != nil {
-		return err
-	}
-
 	configPath := filepath.Join(nockDir, "config.yaml")
 	content := fmt.Sprintf("nav:\n  config: %s\n", nockDir)
-
-	if err := os.WriteFile(configPath, []byte(content), 0644); err != nil {
-		return err
-	}
-
-	return nil
+	return os.WriteFile(configPath, []byte(content), 0644)
 }
