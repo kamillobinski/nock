@@ -55,16 +55,14 @@ const shellIntegrationStart = "# nock:start\n"
 const shellIntegrationEnd = "# nock:end\n"
 
 const shellFunc = `nock() {
-  if [ "$1" = "nav" ]; then
-    if [ "$2" = "back" ]; then
-      cd "$NOCK_PREV_DIR"
-    elif [ -n "$2" ]; then
-      local dir
-      dir=$(command nock nav "$2")
+  if [ "$1" = "nav" ] && [ "$2" = "back" ]; then
+    cd "$NOCK_PREV_DIR"
+  elif [ "$1" = "nav" ] && [ -n "$2" ] && [[ "$2" != -* ]]; then
+    local dir
+    dir=$(command nock "$@")
+    if [ $? -eq 0 ]; then
       export NOCK_PREV_DIR="$PWD"
       cd "$dir"
-    else
-      command nock nav
     fi
   else
     command nock "$@"
