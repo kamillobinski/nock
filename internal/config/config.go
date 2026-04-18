@@ -41,7 +41,10 @@ func Init() error {
 		}
 	}
 
-	return initKnowledgeDirs(nockDir)
+	if err := initKnowledgeDirs(nockDir); err != nil {
+		return err
+	}
+	return initLogDir()
 }
 
 func initKnowledgeDirs(nockDir string) error {
@@ -54,6 +57,18 @@ func initKnowledgeDirs(nockDir string) error {
 	}
 
 	return os.MkdirAll(filepath.Join(knowledgeDir, "pending"), 0755)
+}
+
+func initLogDir() error {
+	logDir := viper.GetString("log.dir")
+	if logDir == "" {
+		home, _ := os.UserHomeDir()
+		logDir = filepath.Join(home, "Documents", "logs")
+	} else if strings.HasPrefix(logDir, "~/") {
+		home, _ := os.UserHomeDir()
+		logDir = filepath.Join(home, logDir[2:])
+	}
+	return os.MkdirAll(logDir, 0755)
 }
 
 func seed(nockDir string) error {
