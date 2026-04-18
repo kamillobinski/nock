@@ -12,8 +12,9 @@ import (
 var listFlag bool
 
 var runCmd = &cobra.Command{
-	Use:   "run [script]",
-	Short: "Run a script",
+	Use:     "run [script]",
+	Aliases: []string{"r"},
+	Short:   "Run a script",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		scriptsDir, err := scriptsDir()

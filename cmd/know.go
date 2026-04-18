@@ -14,8 +14,9 @@ import (
 var knowListFlag bool
 
 var knowCmd = &cobra.Command{
-	Use:   "know",
-	Short: "Manage your knowledge base",
+	Use:     "know",
+	Aliases: []string{"k"},
+	Short:   "Manage your knowledge base",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if knowListFlag {
 			notes, err := knowledge.ListNotes()

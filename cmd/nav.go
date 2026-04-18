@@ -13,8 +13,9 @@ import (
 var navListFlag bool
 
 var navCmd = &cobra.Command{
-	Use:   "nav [shortcut]",
-	Short: "Navigate to a saved directory",
+	Use:     "nav [shortcut]",
+	Aliases: []string{"n"},
+	Short:   "Navigate to a saved directory",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if navListFlag {
