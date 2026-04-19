@@ -44,6 +44,9 @@ func Init() error {
 	if err := initKnowledgeDirs(nockDir); err != nil {
 		return err
 	}
+	if err := initSystemDir(nockDir); err != nil {
+		return err
+	}
 	return initLogDir()
 }
 
@@ -75,4 +78,19 @@ func seed(nockDir string) error {
 	configPath := filepath.Join(nockDir, "config.yaml")
 	content := fmt.Sprintf("nav:\n  config: %s\n", nockDir)
 	return os.WriteFile(configPath, []byte(content), 0644)
+}
+
+func initSystemDir(nockDir string) error {
+	systemDir := filepath.Join(nockDir, "system")
+
+	if err := os.MkdirAll(filepath.Join(systemDir, "scripts"), 0755); err != nil {
+		return err
+	}
+
+	configPath := filepath.Join(systemDir, "config.yaml")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return os.WriteFile(configPath, []byte("groups: []\n"), 0644)
+	}
+
+	return nil
 }
