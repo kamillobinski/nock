@@ -8,8 +8,9 @@ import (
 )
 
 var root = &cobra.Command{
-	Use: "nock",
-	Short: "Personal CLI",
+	Use:     "nock",
+	Short:   "Personal CLI",
+	Version: "0.1.0",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return config.Init()
 	},
