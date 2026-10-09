@@ -1,0 +1,1 @@
+go build -o nock . && sudo mv nock /usr/local/bin/nock && nock init zsh

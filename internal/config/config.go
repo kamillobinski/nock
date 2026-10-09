@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -41,37 +40,7 @@ func Init() error {
 		}
 	}
 
-	if err := initKnowledgeDirs(nockDir); err != nil {
-		return err
-	}
-	if err := initSystemDir(nockDir); err != nil {
-		return err
-	}
-	return initLogDir()
-}
-
-func initKnowledgeDirs(nockDir string) error {
-	knowledgeDir := viper.GetString("knowledge.dir")
-	if knowledgeDir == "" {
-		knowledgeDir = filepath.Join(nockDir, "knowledge")
-	} else if strings.HasPrefix(knowledgeDir, "~/") {
-		home, _ := os.UserHomeDir()
-		knowledgeDir = filepath.Join(home, knowledgeDir[2:])
-	}
-
-	return os.MkdirAll(filepath.Join(knowledgeDir, "pending"), 0755)
-}
-
-func initLogDir() error {
-	logDir := viper.GetString("log.dir")
-	if logDir == "" {
-		home, _ := os.UserHomeDir()
-		logDir = filepath.Join(home, "Documents", "logs")
-	} else if strings.HasPrefix(logDir, "~/") {
-		home, _ := os.UserHomeDir()
-		logDir = filepath.Join(home, logDir[2:])
-	}
-	return os.MkdirAll(logDir, 0755)
+	return initSystemDir(nockDir)
 }
 
 func seed(nockDir string) error {
