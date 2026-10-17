@@ -12,10 +12,10 @@ import (
 var listFlag bool
 
 var runCmd = &cobra.Command{
-	Use:     "run [script]",
+	Use:     "run [script] [args...]",
 	Aliases: []string{"r"},
 	Short:   "Run a script",
-	Args:  cobra.MaximumNArgs(1),
+	Args:    cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		scriptsDir, err := scriptsDir()
 		if err != nil {
@@ -54,7 +54,7 @@ var runCmd = &cobra.Command{
 			return fmt.Errorf("unknown script: %s", args[0])
 		}
 
-		return scripts.Run(target.Path)
+		return scripts.Run(target.Path, args[1:]...)
 	},
 }
 
@@ -67,6 +67,7 @@ func scriptsDir() (string, error) {
 }
 
 func init() {
+	runCmd.Flags().SetInterspersed(false)
 	runCmd.Flags().BoolVarP(&listFlag, "list", "l", false, "List available scripts")
 	root.AddCommand(runCmd)
 }

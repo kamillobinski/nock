@@ -64,6 +64,18 @@ const shellFunc = `nock() {
       export NOCK_PREV_DIR="$PWD"
       cd "$dir"
     fi
+  elif [ "$1" = "run" ] || [ "$1" = "r" ]; then
+    local cd_file dir ret
+    cd_file=$(mktemp)
+    NOCK_CD_FILE="$cd_file" command nock "$@"
+    ret=$?
+    dir=$(cat "$cd_file")
+    rm -f "$cd_file"
+    if [ $ret -eq 0 ] && [ -n "$dir" ]; then
+      export NOCK_PREV_DIR="$PWD"
+      cd "$dir"
+    fi
+    return $ret
   else
     command nock "$@"
   fi
