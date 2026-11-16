@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -54,7 +56,13 @@ var runCmd = &cobra.Command{
 			return fmt.Errorf("unknown script: %s", args[0])
 		}
 
-		return scripts.Run(target.Path, args[1:]...)
+		err = scripts.Run(target.Path, args[1:]...)
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			// The script reported its own error; just pass its exit code through.
+			os.Exit(exitErr.ExitCode())
+		}
+		return err
 	},
 }
 
