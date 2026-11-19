@@ -9,6 +9,7 @@ import (
 
 type Script struct {
 	Name        string
+	Group       string
 	Description string
 	Path        string
 }
@@ -19,24 +20,49 @@ func List(dir string) ([]Script, error) {
 		return nil, err
 	}
 
-	var scripts []Script
+	var root, grouped []Script
 	for _, entry := range entries {
-		if entry.IsDir() {
+		if strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
-
-		path := filepath.Join(dir, entry.Name())
-		name := strings.TrimSuffix(entry.Name(), filepath.Ext(entry.Name()))
-		description := readDescription(path)
-
-		scripts = append(scripts, Script{
-			Name:        name,
-			Description: description,
-			Path:        path,
-		})
+		if entry.IsDir() {
+			group, err := readDir(filepath.Join(dir, entry.Name()), entry.Name())
+			if err != nil {
+				return nil, err
+			}
+			grouped = append(grouped, group...)
+			continue
+		}
+		root = append(root, newScript(dir, entry.Name(), ""))
 	}
 
+	return append(root, grouped...), nil
+}
+
+func readDir(dir, group string) ([]Script, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	var scripts []Script
+	for _, entry := range entries {
+		if entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+		scripts = append(scripts, newScript(dir, entry.Name(), group))
+	}
 	return scripts, nil
+}
+
+func newScript(dir, file, group string) Script {
+	path := filepath.Join(dir, file)
+	return Script{
+		Name:        strings.TrimSuffix(file, filepath.Ext(file)),
+		Group:       group,
+		Description: readDescription(path),
+		Path:        path,
+	}
 }
 
 func readDescription(path string) string {
