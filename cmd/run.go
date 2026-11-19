@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"kamillobinski.dev/nock/internal/scripts"
@@ -28,6 +29,9 @@ var runCmd = &cobra.Command{
 			list, err := scripts.List(scriptsDir)
 			if err != nil {
 				return err
+			}
+			if len(args) > 0 {
+				list = filterScripts(list, strings.Join(args, " "))
 			}
 			for _, s := range list {
 				fmt.Printf("%-20s %s\n", s.Name, s.Description)
@@ -64,6 +68,42 @@ var runCmd = &cobra.Command{
 		}
 		return err
 	},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) > 0 || listFlag {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		dir, err := scriptsDir()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		list, err := scripts.List(dir)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		var out []string
+		for _, s := range list {
+			if !strings.HasPrefix(s.Name, toComplete) {
+				continue
+			}
+			if s.Description != "" {
+				out = append(out, s.Name+"\t"+s.Description)
+			} else {
+				out = append(out, s.Name)
+			}
+		}
+		return out, cobra.ShellCompDirectiveNoFileComp
+	},
+}
+
+func filterScripts(list []scripts.Script, query string) []scripts.Script {
+	q := strings.ToLower(query)
+	var out []scripts.Script
+	for _, s := range list {
+		if strings.Contains(strings.ToLower(s.Name), q) || strings.Contains(strings.ToLower(s.Description), q) {
+			out = append(out, s)
+		}
+	}
+	return out
 }
 
 func scriptsDir() (string, error) {
@@ -76,6 +116,6 @@ func scriptsDir() (string, error) {
 
 func init() {
 	runCmd.Flags().SetInterspersed(false)
-	runCmd.Flags().BoolVarP(&listFlag, "list", "l", false, "List available scripts")
+	runCmd.Flags().BoolVarP(&listFlag, "list", "l", false, "List available scripts, optionally filtered: -l [filter]")
 	root.AddCommand(runCmd)
 }

@@ -14,12 +14,14 @@ var initCmd = &cobra.Command{
 	Short: "Install shell integration",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var configFile string
+		var configFile, completion string
 		switch args[0] {
 		case "zsh":
 			configFile = filepath.Join(os.Getenv("HOME"), ".zshrc")
+			completion = zshCompletion
 		case "bash":
 			configFile = filepath.Join(os.Getenv("HOME"), ".bashrc")
+			completion = bashCompletion
 		default:
 			return fmt.Errorf("unsupported shell: %s (supported: zsh, bash)", args[0])
 		}
@@ -29,7 +31,7 @@ var initCmd = &cobra.Command{
 			return err
 		}
 
-		block := shellIntegrationStart + shellFunc + shellIntegrationEnd
+		block := shellIntegrationStart + shellFunc + completion + shellIntegrationEnd
 		content := string(current)
 
 		start := strings.Index(content, shellIntegrationStart)
@@ -80,6 +82,16 @@ const shellFunc = `nock() {
     command nock "$@"
   fi
 }
+`
+
+const zshCompletion = `if ! (( $+functions[compdef] )); then
+  autoload -Uz compinit && compinit
+fi
+eval "$(command nock completion zsh)"
+compdef _nock nock
+`
+
+const bashCompletion = `eval "$(command nock completion bash)"
 `
 
 func init() {
